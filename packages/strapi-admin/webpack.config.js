@@ -10,6 +10,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
 const alias = require('./webpack.alias.js');
+const fs = require('fs');
+const autoprefixer = require('autoprefixer');
 
 // TODO: parametrize
 const URLs = {
@@ -60,9 +62,7 @@ module.exports = ({
       // Utilize long-term caching by adding content hashes (not compilation hashes)
       // to compiled assets for production
       filename: isProduction ? '[name].[contenthash:8].js' : 'bundle.js',
-      chunkFilename: isProduction
-        ? '[name].[contenthash:8].chunk.js'
-        : '[name].chunk.js',
+      chunkFilename: isProduction ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
     },
     optimization: {
       minimize: optimize,
@@ -100,7 +100,9 @@ module.exports = ({
       rules: [
         {
           test: /\.m?js$/,
-          exclude: /node_modules/,
+          exclude: new RegExp(
+            fs.readFileSync(path.resolve('./non_ES5_node_modules'), 'utf-8').slice(1, -2)
+          ),
           use: {
             loader: require.resolve('babel-loader'),
             options: {
@@ -115,9 +117,7 @@ module.exports = ({
                 require.resolve('@babel/plugin-proposal-class-properties'),
                 require.resolve('@babel/plugin-syntax-dynamic-import'),
                 require.resolve('@babel/plugin-transform-modules-commonjs'),
-                require.resolve(
-                  '@babel/plugin-proposal-async-generator-functions'
-                ),
+                require.resolve('@babel/plugin-proposal-async-generator-functions'),
                 [
                   require.resolve('@babel/plugin-transform-runtime'),
                   {
@@ -142,7 +142,17 @@ module.exports = ({
           // Preprocess 3rd party .css files located in node_modules
           test: /\.css$/,
           include: /node_modules/,
-          use: ['style-loader', 'css-loader'],
+          use: [
+            'style-loader',
+            'css-loader',
+            {
+              loader: 'postcss-loader',
+              options: {
+                plugins: [autoprefixer({})],
+                sourceMap: true,
+              },
+            },
+          ],
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,
@@ -182,9 +192,7 @@ module.exports = ({
         // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(
-          isProduction ? 'production' : 'development'
-        ),
+        'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
         NODE_ENV: JSON.stringify(isProduction ? 'production' : 'development'),
         REMOTE_URL: JSON.stringify(options.publicPath),
         BACKEND_URL: JSON.stringify(options.backend),

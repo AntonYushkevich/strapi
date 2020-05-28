@@ -3,7 +3,7 @@ import Background from '../../assets/images/background_empty.svg';
 
 const Wrapper = styled.div`
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   text-align: center;
   padding: 6.2rem 0;
   background: #fafafb;

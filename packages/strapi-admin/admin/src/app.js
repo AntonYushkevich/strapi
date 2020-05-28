@@ -16,7 +16,10 @@
 
 import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
-
+// fix about-controller error
+import 'promise-polyfill/src/polyfill';
+import 'unfetch/polyfill';
+import 'abortcontroller-polyfill';
 // Third party css library needed
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
