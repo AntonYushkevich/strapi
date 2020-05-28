@@ -9,12 +9,14 @@ module.exports = () => {
     backend: 'http://localhost:1337',
     publicPath: '/admin/',
   };
+  const excludePath = path.join(__dirname, 'admin', 'non_ES5_node_modules');
 
   const args = {
     entry,
     dest,
     env,
     options,
+    excludePath,
   };
 
   return {

@@ -10,7 +10,6 @@ const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
 const alias = require('./webpack.alias.js');
-const fs = require('fs');
 const autoprefixer = require('autoprefixer');
 
 // TODO: parametrize
@@ -27,6 +26,7 @@ module.exports = ({
     backend: 'http://localhost:1337',
     publicPath: '/admin/',
   },
+  excludePath,
 }) => {
   const isProduction = env === 'production';
   const webpackPlugins = isProduction
@@ -53,7 +53,7 @@ module.exports = ({
 
   return {
     mode: isProduction ? 'production' : 'development',
-    bail: isProduction ? true : false,
+    bail: isProduction,
     devtool: isProduction ? false : 'cheap-module-source-map',
     entry,
     output: {
@@ -100,9 +100,7 @@ module.exports = ({
       rules: [
         {
           test: /\.m?js$/,
-          exclude: new RegExp(
-            fs.readFileSync(path.resolve('./non_ES5_node_modules'), 'utf-8').slice(1, -2)
-          ),
+          exclude: new RegExp(excludePath, 'utf-8').slice(1, -2),
           use: {
             loader: require.resolve('babel-loader'),
             options: {
